@@ -1,5 +1,6 @@
 from discord.ext import commands
 from ytdl.source import YTDLSource
+from asyncio import sleep
 
 
 class Kakatua(commands.Cog):
@@ -16,6 +17,9 @@ class Kakatua(commands.Cog):
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
             ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+            while ctx.voice_client.is_playing():
+                await sleep(1)
+            await ctx.voice_client.disconnect()
         await ctx.send(f'Now playing: {player.title}')
 
     @play.before_invoke
