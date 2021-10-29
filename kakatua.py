@@ -51,10 +51,10 @@ class Kakatua(commands.Cog):
                 self.player = await YTDLSource.play_url(data, stream=True)
                 ctx.voice_client.play(self.player, after=lambda e: print(f'Player error: {e}') if e else None)
                 await self.__display_current_playing(ctx)
-            while ctx.voice_client.is_playing():
+            while ctx.voice_client is not None and ctx.voice_client.is_playing():
                 await sleep(1)
             await self.__play_next(ctx)
-        else:
+        elif ctx.voice_client is not None:
             await ctx.voice_client.disconnect()
 
     async def __display_current_playing(self, ctx: commands.Context):
