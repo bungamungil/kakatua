@@ -7,6 +7,7 @@ class Kakatua(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.playlist = []
 
     @commands.command()
     async def check(self, ctx: commands.Context, *, text):
@@ -14,13 +15,8 @@ class Kakatua(commands.Cog):
 
     @commands.command()
     async def play(self, ctx: commands.Context, *, url):
-        async with ctx.typing():
-            player = await YTDLSource.play_url(url, loop=self.bot.loop, stream=True)
-            ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
-            while ctx.voice_client.is_playing():
-                await sleep(1)
-            await ctx.voice_client.disconnect()
-        await ctx.send(f'Now playing: {player.title}')
+        self.playlist.extend(await YTDLSource.extract_info(url, loop=self.bot.loop, stream=True))
+        await self.__play_next(ctx)
 
     @play.before_invoke
     async def ensure_voice(self, ctx: commands.Context):
@@ -32,3 +28,16 @@ class Kakatua(commands.Cog):
                 raise commands.CommandError('Author not connected to a voice channel.')
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
+
+    async def __play_next(self, ctx: commands.Context):
+        if len(self.playlist) > 0:
+            async with ctx.typing():
+                data = self.playlist.pop(0)
+                player = await YTDLSource.play_url(data, stream=True)
+                ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+                await ctx.send(f'Now playing: {player.title}')
+            while ctx.voice_client.is_playing():
+                await sleep(1)
+            await self.__play_next(ctx)
+        else:
+            await ctx.voice_client.disconnect()
