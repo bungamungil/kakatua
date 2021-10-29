@@ -8,6 +8,7 @@ class Kakatua(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.playlist = []
+        self.player = None
 
     @commands.command()
     async def check(self, ctx: commands.Context, *, text):
@@ -24,6 +25,14 @@ class Kakatua(commands.Cog):
         if ctx.voice_client.is_connected():
             await ctx.voice_client.disconnect()
 
+    @commands.command()
+    async def np(self, ctx: commands.Context):
+        await self.__display_current_playing(ctx)
+
+    @commands.command()
+    async def now_playing(self, ctx: commands.Context):
+        await self.__display_current_playing(ctx)
+
     @play.before_invoke
     async def ensure_voice(self, ctx: commands.Context):
         if ctx.voice_client is None:
@@ -39,11 +48,14 @@ class Kakatua(commands.Cog):
         if len(self.playlist) > 0:
             async with ctx.typing():
                 data = self.playlist.pop(0)
-                player = await YTDLSource.play_url(data, stream=True)
-                ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
-                await ctx.send(f'Now playing: {player.title}')
+                self.player = await YTDLSource.play_url(data, stream=True)
+                ctx.voice_client.play(self.player, after=lambda e: print(f'Player error: {e}') if e else None)
+                await self.__display_current_playing(ctx)
             while ctx.voice_client.is_playing():
                 await sleep(1)
             await self.__play_next(ctx)
         else:
             await ctx.voice_client.disconnect()
+
+    async def __display_current_playing(self, ctx: commands.Context):
+        await ctx.send(f'Now playing: {self.player.title}')
