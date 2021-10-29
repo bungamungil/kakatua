@@ -1,7 +1,12 @@
-import discord
+from discord.ext import commands
 import env
 
-intents = discord.Intents().all()
-client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix=commands.when_mentioned_or(env.cmd_prefix))
 
-client.run(env.bot_token)
+
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user}')
+
+
+bot.run(env.bot_token)
