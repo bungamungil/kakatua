@@ -18,6 +18,12 @@ class Kakatua(commands.Cog):
         self.playlist.extend(await YTDLSource.extract_info(url, loop=self.bot.loop, stream=True))
         await self.__play_next(ctx)
 
+    @commands.command()
+    async def stop(self, ctx: commands.Context):
+        self.playlist.clear()
+        if ctx.voice_client.is_connected():
+            await ctx.voice_client.disconnect()
+
     @play.before_invoke
     async def ensure_voice(self, ctx: commands.Context):
         if ctx.voice_client is None:
