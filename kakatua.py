@@ -1,5 +1,5 @@
 from discord.ext import commands
-from ytdl import source
+from ytdl.source import YTDLSource
 
 
 class Kakatua(commands.Cog):
@@ -14,7 +14,7 @@ class Kakatua(commands.Cog):
     @commands.command()
     async def play(self, ctx: commands.Context, *, url):
         async with ctx.typing():
-            player = await source.YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+            player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
             ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
         await ctx.send(f'Now playing: {player.title}')
 
