@@ -15,7 +15,7 @@ class Kakatua(commands.Cog):
     @commands.command()
     async def play(self, ctx: commands.Context, *, url):
         async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+            player = await YTDLSource.play_url(url, loop=self.bot.loop, stream=True)
             ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
             while ctx.voice_client.is_playing():
                 await sleep(1)
