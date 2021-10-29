@@ -33,6 +33,10 @@ class Kakatua(commands.Cog):
     async def now_playing(self, ctx: commands.Context):
         await self.__display_current_playing(ctx)
 
+    @commands.command()
+    async def queue(self, ctx: commands.Context):
+        await self.__display_playlist(ctx)
+
     @play.before_invoke
     async def ensure_voice(self, ctx: commands.Context):
         if ctx.voice_client is None:
@@ -59,3 +63,6 @@ class Kakatua(commands.Cog):
 
     async def __display_current_playing(self, ctx: commands.Context):
         await ctx.send(f'Now playing: {self.player.title}')
+
+    async def __display_playlist(self, ctx: commands.Context):
+        await ctx.send('\n'.join(map(lambda item: item['title'], self.playlist)))
