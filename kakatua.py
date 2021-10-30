@@ -37,6 +37,12 @@ class Kakatua(commands.Cog):
     async def queue(self, ctx: commands.Context):
         await self.__display_playlist(ctx)
 
+    @commands.command()
+    async def next(self, ctx: commands.Context):
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
+        await self.__play_next(ctx)
+
     @play.before_invoke
     async def ensure_voice(self, ctx: commands.Context):
         if ctx.voice_client is None:
