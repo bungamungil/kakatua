@@ -41,6 +41,16 @@ class Kakatua(commands.Cog):
     async def next(self, ctx: commands.Context):
         if ctx.voice_client.is_playing():
             ctx.voice_client.stop()
+
+    @commands.command()
+    async def pause(self, ctx: commands.Context):
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.pause()
+
+    @commands.command()
+    async def resume(self, ctx: commands.Context):
+        if ctx.voice_client.is_paused():
+            ctx.voice_client.resume()
         await self.__play_next(ctx)
 
     @play.before_invoke
@@ -63,7 +73,8 @@ class Kakatua(commands.Cog):
                 await self.__display_current_playing(ctx)
             while ctx.voice_client is not None and ctx.voice_client.is_playing():
                 await sleep(1)
-            await self.__play_next(ctx)
+            if not ctx.voice_client.is_paused():
+                await self.__play_next(ctx)
         elif ctx.voice_client is not None:
             await ctx.voice_client.disconnect()
 
